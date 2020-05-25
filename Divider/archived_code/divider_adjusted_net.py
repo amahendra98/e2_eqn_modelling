@@ -33,7 +33,7 @@ class paper_divider(torch.nn.Module):
 
 # Specify Net
 model = paper_divider(D_in,H1,H2,D_out)
-writer = SummaryWriter("paper_divider_net")
+writer = SummaryWriter("../runs/paper_divider_net")
 
 # Initialize Data
 res = 100

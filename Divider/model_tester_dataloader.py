@@ -2,6 +2,8 @@ import torch
 import common_functions as cf
 import div_models as div
 from torch.utils.tensorboard import SummaryWriter
+from D_set import D_set
+from torch.utils.data import DataLoader
 
 """ Code to generate a neural network implementation of division by testing different architectures """
 
@@ -11,7 +13,7 @@ D_out = 1  # output dimension
 N = 5000  # batch size
 H = ('s', 100,'s',100,'s',100,'s',100,'s',100,'s',100,'r') # Specify hidden dimensions + activation functions
 learning_rate = 1e-4
-num_epochs = 5000
+num_epochs = 1000
 trainable = True #only multiplier_reciprocator model is not trainable
 
 
@@ -35,8 +37,12 @@ u_min = 1     # u is the denominator
 u_max= 20000
 r_min = 0     # r is the numerator
 r_max = 2500
+rand = True
 
-(x_data, y_data) = cf.sampler(data_length,u_min,u_max,r_min,r_max)
+D = DataLoader(D_set(100, r_min, r_max, u_min, u_max, rand), batch_size = N,shuffle=True)
+
+#(x_data, y_data) = cf.sampler(data_length,u_min,u_max,r_min,r_max)
+
 
 """Old Version of sampling Code
 r = np.linspace(0,2500,res)
@@ -63,28 +69,29 @@ loss_fn = torch.nn.MSELoss()
 
 # Training
 print("TRAIN")
-pointer = 0
-for epoch in range(num_epochs):
-    # Collate batches
-    x = x_data[pointer:pointer+N]
-    y = y_data[pointer:pointer+N]
-    pointer = (pointer+N)%(data_length)
+num_batches = data_length/N
+for e in range(int(num_epochs/num_batches)):
+    for i, sampled_batch in enumerate(D):           # For loop runs data_length/N times
+        epoch = e*num_batches + i
+        x = sampled_batch['x_data'].squeeze().float()
+        y = sampled_batch['y_data'].float()
 
-    y_pred = model(x)
-    loss = loss_fn(y_pred,y)
-    # loss = torch.mean(torch.mean(((y_pred - y)**2)/(y*y), 1))
+        y_pred = model(x)
+        loss = loss_fn(y_pred,y)
+        # loss = torch.mean(torch.mean(((y_pred - y)**2)/(y*y), 1))
 
-    if trainable:
-        model.zero_grad()
-        loss.backward()
-        with torch.no_grad():
-            for param in model.parameters():
-                param -= learning_rate * param.grad
+        if trainable:
+            model.zero_grad()
+            loss.backward()
+            with torch.no_grad():
+                for param in model.parameters():
+                    param -= learning_rate * param.grad
 
-    err = loss.item()
-    #print(epoch,err,y[0],y_pred[0])
-    writer.add_scalar('training loss', err, epoch)
-    cf.progress(num_epochs,epoch)
+        err = loss.item()
+        #print(epoch,err,y[0],y_pred[0])
+        print(epoch)
+        writer.add_scalar('training loss', err, epoch)
+        cf.progress(num_epochs/num_batches,e)
 
 
 # Evaluation, creates 3d graph of loss vs. input values over entire domain
