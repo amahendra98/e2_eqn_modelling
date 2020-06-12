@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 
-class D_set(torch.utils.data.Dataset):
+class Divider_Domain_set(torch.utils.data.Dataset):
     def __init__(self, res, r_min, r_max, u_min, u_max, rand):
         self.res = res
         if rand:

@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 """ All DATA ANALYSIS """
 # Load Data
-data = pd.read_csv("all_data.csv")
+data = pd.read_csv("range_file_3.csv")
 data_extracted = pd.DataFrame(data, columns=['num_max','denom_max','denom_min','epoch']).to_numpy()
 
 # Data arrays
@@ -28,6 +28,22 @@ plt.hist(n_max, bins=1000)
 # Histogram of maximum denominator values
 plt.figure(2)
 plt.hist(d_max, bins=10000)
+
+# 2d Histogram trial 1
+plt.figure(3)
+hist, xedges, yedges = np.histogram2d(n_max,d_max,bins=10000)
+xpos, ypos = np.meshgrid(xedges[:-1] + 0.25, yedges[:-1] + 0.25, indexing="ij")
+xpos = xpos.ravel()
+ypos = ypos.ravel()
+zpos = 0
+
+# Construct arrays with the dimensions for the 16 bars.
+dx = dy = 0.5 * np.ones_like(zpos)
+dz = hist.ravel()
+ax = plt.axes(projection='3d')
+ax.bar3d(xpos, ypos, zpos, dx, dy, dz, zsort='average')
+
+plt.show()
 
 # Scatter Plot of maximum denominator values
 #plt.figure(3)

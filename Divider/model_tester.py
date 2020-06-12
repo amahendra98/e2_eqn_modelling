@@ -11,7 +11,7 @@ D_out = 1  # output dimension
 N = 5000  # batch size
 H = ('s', 100,'s',100,'s',100,'s',100,'s',100,'s',100,'r') # Specify hidden dimensions + activation functions
 learning_rate = 1e-4
-num_epochs = 5000
+num_epochs = 5
 trainable = True #only multiplier_reciprocator model is not trainable
 
 
@@ -37,24 +37,6 @@ r_min = 0     # r is the numerator
 r_max = 2500
 
 (x_data, y_data) = cf.sampler(data_length,u_min,u_max,r_min,r_max)
-
-"""Old Version of sampling Code
-r = np.linspace(0,2500,res)
-u = np.linspace(1,20000,res)
-x_np = np.empty((res*res,2))
-y_np = np.empty((res*res,1))
-
-for r_index in range(res):
-    x_np[res*r_index : res*r_index + res,0] = np.ones_like(r)*r[r_index]
-    x_np[res*r_index : res*r_index + res,1] = u
-
-np.random.shuffle(x_np)
-
-y_np = x_np[:,0]/x_np[:,1]
-
-x_data = torch.from_numpy(x_np).float()
-y_data = torch.from_numpy(y_np).float()
-"""
 
 # Save Training Data
 writer = SummaryWriter("runs/"+tag_name)
@@ -89,4 +71,4 @@ for epoch in range(num_epochs):
 
 # Evaluation, creates 3d graph of loss vs. input values over entire domain
 print("\nEVAL")
-cf.eval_domain_3d(u_min,u_max,r_min,r_max,100,model,clipAxis=True,loss_fn=0)
+cf.eval_domain_3d(u_min,u_max,r_min,r_max,100,model,clipAxis=True,loss_fn=1)

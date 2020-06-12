@@ -1,8 +1,9 @@
 import torch
+import numpy as np
 import common_functions as cf
 import div_models as div
 from torch.utils.tensorboard import SummaryWriter
-from D_set import D_set
+from D_set import Divider_Domain_set as D
 from torch.utils.data import DataLoader
 
 """ Code to generate a neural network implementation of division by testing different architectures """
@@ -18,8 +19,8 @@ trainable = True #only multiplier_reciprocator model is not trainable
 
 
 # Create models and name the run
-#model = div.net_from_array(D_in, D_out, H)     # Model for testing different neural nets
-#tag_name = div.makeTagName(H)
+model = div.net_from_array(D_in, D_out, H)     # Model for testing different neural nets
+tag_name = div.makeTagName(H)
 
 #model = div.NALU(D_in, D_out)
 #tag_name = "NALU"
@@ -27,8 +28,8 @@ trainable = True #only multiplier_reciprocator model is not trainable
 #model = div.multiplier_reciprocator()
 #tag_name = "multiplier_reciprocator"
 
-model = div.adj_div_net()
-tag_name = "adj_div_net"
+#model = div.adj_div_net()
+#tag_name = "adj_div_net"
 
 
 # Sampling domain to produce input and output data
@@ -39,28 +40,8 @@ r_min = 0     # r is the numerator
 r_max = 2500
 rand = True
 
-D = DataLoader(D_set(100, r_min, r_max, u_min, u_max, rand), batch_size = N,shuffle=True)
+D = DataLoader(D(100, r_min, r_max, u_min, u_max, rand), batch_size = N,shuffle=True)
 
-#(x_data, y_data) = cf.sampler(data_length,u_min,u_max,r_min,r_max)
-
-
-"""Old Version of sampling Code
-r = np.linspace(0,2500,res)
-u = np.linspace(1,20000,res)
-x_np = np.empty((res*res,2))
-y_np = np.empty((res*res,1))
-
-for r_index in range(res):
-    x_np[res*r_index : res*r_index + res,0] = np.ones_like(r)*r[r_index]
-    x_np[res*r_index : res*r_index + res,1] = u
-
-np.random.shuffle(x_np)
-
-y_np = x_np[:,0]/x_np[:,1]
-
-x_data = torch.from_numpy(x_np).float()
-y_data = torch.from_numpy(y_np).float()
-"""
 
 # Save Training Data
 writer = SummaryWriter("runs/"+tag_name)
@@ -70,6 +51,7 @@ loss_fn = torch.nn.MSELoss()
 # Training
 print("TRAIN")
 num_batches = data_length/N
+train_loss = []
 for e in range(int(num_epochs/num_batches)):
     for i, sampled_batch in enumerate(D):           # For loop runs data_length/N times
         epoch = e*num_batches + i
@@ -88,12 +70,11 @@ for e in range(int(num_epochs/num_batches)):
                     param -= learning_rate * param.grad
 
         err = loss.item()
-        #print(epoch,err,y[0],y_pred[0])
-        print(epoch)
+        print(epoch,err)
         writer.add_scalar('training loss', err, epoch)
         cf.progress(num_epochs/num_batches,e)
 
 
 # Evaluation, creates 3d graph of loss vs. input values over entire domain
 print("\nEVAL")
-cf.eval_domain_3d(u_min,u_max,r_min,r_max,100,model,clipAxis=True,loss_fn=0)
+cf.eval_domain_3d(u_min,u_max,r_min,r_max,100,model,clipAxis=True,loss_fn=1)
