@@ -11,7 +11,7 @@ D_out = 1  # output dimension
 N = 5000  # batch size
 H = ('s', 100,'s',100,'s',100,'s',100,'s',100,'s',100,'r') # Specify hidden dimensions + activation functions
 learning_rate = 1e-4
-num_epochs = 5
+num_epochs = 5000
 trainable = True #only multiplier_reciprocator model is not trainable
 
 
@@ -31,10 +31,10 @@ tag_name = "adj_div_net"
 
 # Sampling domain to produce input and output data
 data_length = 10000   # Number of samples
-u_min = 1     # u is the denominator
-u_max= 20000
-r_min = 0     # r is the numerator
-r_max = 2500
+u_min = 0.0001     # u is the denominator
+u_max= 1000
+r_min = 0.001     # r is the numerator
+r_max = 10
 
 (x_data, y_data) = cf.sampler(data_length,u_min,u_max,r_min,r_max)
 
@@ -71,4 +71,4 @@ for epoch in range(num_epochs):
 
 # Evaluation, creates 3d graph of loss vs. input values over entire domain
 print("\nEVAL")
-cf.eval_domain_3d(u_min,u_max,r_min,r_max,100,model,clipAxis=True,loss_fn=1)
+cf.eval_domain_3d(u_min,u_max,r_min,r_max,1000,model,clipAxis=True,loss_fn=1)

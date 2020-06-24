@@ -52,6 +52,8 @@ def eval_domain_3d(u_min,u_max,r_min,r_max,res,model,clipAxis=True, loss_fn=1):
 
         avg_loss_y[i] = np.average(loss_map[i, :])
 
+    print(loss_map)
+    loss_map = loss_map.astype('float64')
     avg_loss = np.average(loss_map)
     for i in range(len(loss_map)):
         avg_loss_x[i] = np.average(loss_map[:, i])
